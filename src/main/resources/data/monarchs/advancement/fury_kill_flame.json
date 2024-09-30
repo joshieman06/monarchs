@@ -1,0 +1,28 @@
+{
+        "display": {
+        "title": {
+            "text": "Flames of Vengeance"
+        },
+        "description": {
+            "text": "Kill a Monarch of Flame as a Monarch of Fury"
+        },
+        "icon": {
+            "id": "minecraft:charcoal"
+        },
+        "frame": "challenge",
+        "show_toast": true,
+        "announce_to_chat": true,
+        "hidden": false
+    },
+    "criteria": {
+        "create_faction": {
+            "trigger": "minecraft:impossible"
+        }
+    },
+    "requirements": [
+        [
+            "create_faction"
+        ]
+    ],
+    "parent": "monarchs:fury_monarch_kill"
+}

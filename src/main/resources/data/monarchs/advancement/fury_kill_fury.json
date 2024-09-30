@@ -1,0 +1,28 @@
+{
+        "display": {
+        "title": {
+            "text": "Unmatched Rage"
+        },
+        "description": {
+            "text": "Kill a Monarch of Fury as a Monarch of Fury"
+        },
+        "icon": {
+            "id": "minecraft:fermented_spider_eye"
+        },
+        "frame": "challenge",
+        "show_toast": true,
+        "announce_to_chat": true,
+        "hidden": false
+    },
+    "criteria": {
+        "create_faction": {
+            "trigger": "minecraft:impossible"
+        }
+    },
+    "requirements": [
+        [
+            "create_faction"
+        ]
+    ],
+    "parent": "monarchs:fury_monarch_kill"
+}

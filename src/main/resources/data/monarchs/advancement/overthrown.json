@@ -1,0 +1,28 @@
+{
+        "display": {
+        "title": {
+            "text": "Treason"
+        },
+        "description": {
+            "text": "Overthrow a Monarchy"
+        },
+        "icon": {
+            "id": "monarchs:faction_leave"
+        },
+        "frame": "goal",
+        "show_toast": true,
+        "announce_to_chat": true,
+        "hidden": false
+    },
+    "criteria": {
+        "create_faction": {
+            "trigger": "minecraft:impossible"
+        }
+    },
+    "requirements": [
+        [
+            "create_faction"
+        ]
+    ],
+    "parent": "monarchs:honor"
+}

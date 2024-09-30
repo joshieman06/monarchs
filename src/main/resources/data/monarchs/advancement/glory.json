@@ -1,0 +1,28 @@
+{
+        "display": {
+        "title": {
+            "text": "Glory"
+        },
+        "description": {
+            "text": "Kill four enemy knights alone"
+        },
+        "icon": {
+            "id": "minecraft:diamond_sword"
+        },
+        "frame": "goal",
+        "show_toast": true,
+        "announce_to_chat": true,
+        "hidden": false
+    },
+    "criteria": {
+        "create_faction": {
+            "trigger": "minecraft:impossible"
+        }
+    },
+    "requirements": [
+        [
+            "create_faction"
+        ]
+    ],
+    "parent": "monarchs:honor"
+}

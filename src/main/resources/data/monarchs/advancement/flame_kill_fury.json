@@ -1,0 +1,28 @@
+{
+        "display": {
+        "title": {
+            "text": "Scorched Anger"
+        },
+        "description": {
+            "text": "Kill a Monarch of Fury as a Monarch of Flame"
+        },
+        "icon": {
+            "id": "minecraft:nether_brick"
+        },
+        "frame": "challenge",
+        "show_toast": true,
+        "announce_to_chat": true,
+        "hidden": false
+    },
+    "criteria": {
+        "create_faction": {
+            "trigger": "minecraft:impossible"
+        }
+    },
+    "requirements": [
+        [
+            "create_faction"
+        ]
+    ],
+    "parent": "monarchs:flame_monarch_kill"
+}

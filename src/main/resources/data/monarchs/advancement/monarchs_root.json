@@ -1,0 +1,43 @@
+{
+        "display": {
+        "title": {
+            "translate": "advancements.story.root.title",
+            "text": "Monarchs"
+        },
+        "description": {
+            "translate": "advancements.story.root.description",
+            "text": "Battle alongside friends in a Monarchy, with unique buffs. Join the power struggle for the crown"
+        },
+        "icon": {
+            "id": "monarchs:rose_gold_circlet"
+        },
+        "announce_to_chat": false,
+        "background": "monarchs:textures/gui/advancements/backgrounds/stone_bricks.png",
+        "frame": "task",
+        "hidden": false,
+        "show_toast": false
+    },
+    "requirements": [
+        [
+            "iron_ingot"
+        ]
+    ],
+    "criteria": {
+        "iron_ingot": {
+            "trigger": "minecraft:inventory_changed",
+            "conditions": {
+                "items": [
+                    {
+                        "item": "minecraft:iron_ingot"
+                    }
+                ]
+            }
+        }
+    },
+    "rewards": {
+        "recipes": [
+            "monarchs:rose_gold_circlet",
+            "monarchs:facton_leave"
+        ]
+    }
+}

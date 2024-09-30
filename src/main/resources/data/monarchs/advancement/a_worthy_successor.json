@@ -1,0 +1,28 @@
+{
+       "display": {
+        "title": {
+            "text": "A Worthy Successor"
+        },
+        "description": {
+            "text": "Follow in the footsteps of your predecessor"
+        },
+        "icon": {
+            "id": "monarchs:faction_invite"
+        },
+        "frame": "task",
+        "show_toast": true,
+        "announce_to_chat": true,
+        "hidden": false
+    },
+    "criteria": {
+        "create_faction": {
+            "trigger": "minecraft:impossible"
+        }
+    },
+    "requirements": [
+        [
+            "create_faction"
+        ]
+    ],
+    "parent": "monarchs:knighthood"
+}

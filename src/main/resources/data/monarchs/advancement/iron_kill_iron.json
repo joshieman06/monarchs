@@ -1,0 +1,28 @@
+{
+        "display": {
+        "title": {
+            "text": "Iron Sharpens Iron"
+        },
+        "description": {
+            "text": "Kill a Monarch of Iron as a Monarch of Iron"
+        },
+        "icon": {
+            "id": "minecraft:damaged_anvil"
+        },
+        "frame": "challenge",
+        "show_toast": true,
+        "announce_to_chat": true,
+        "hidden": false
+    },
+    "criteria": {
+        "create_faction": {
+            "trigger": "minecraft:impossible"
+        }
+    },
+    "requirements": [
+        [
+            "create_faction"
+        ]
+    ],
+    "parent": "monarchs:iron_monarch_kill"
+}

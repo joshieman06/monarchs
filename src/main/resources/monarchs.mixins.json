@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "joshie.monarchs.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "ExampleMixin",
+    "PlayerEntityMixin",
+    "ItemMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+	}
+}

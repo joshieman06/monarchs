@@ -1,0 +1,28 @@
+{
+        "display": {
+        "title": {
+            "text": "Forged in Fire"
+        },
+        "description": {
+            "text": "Kill a Monarch of Flame as a Monarch of Iron"
+        },
+        "icon": {
+            "id": "minecraft:fire_charge"
+        },
+        "frame": "challenge",
+        "show_toast": true,
+        "announce_to_chat": true,
+        "hidden": false
+    },
+    "criteria": {
+        "create_faction": {
+            "trigger": "minecraft:impossible"
+        }
+    },
+    "requirements": [
+        [
+            "create_faction"
+        ]
+    ],
+    "parent": "monarchs:iron_monarch_kill"
+}

@@ -1,0 +1,28 @@
+{
+        "display": {
+        "title": {
+            "text": "Knighthood"
+        },
+        "description": {
+            "text": "Become a knight under a monarch"
+        },
+        "icon": {
+            "id": "minecraft:iron_sword"
+        },
+        "frame": "task",
+        "show_toast": true,
+        "announce_to_chat": true,
+        "hidden": false
+    },
+    "criteria": {
+        "join_faction": {
+            "trigger": "minecraft:impossible"
+        }
+    },
+    "requirements": [
+        [
+            "join_faction"
+        ]
+    ],
+    "parent": "monarchs:monarchs_root"
+}

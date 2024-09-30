@@ -1,0 +1,41 @@
+{
+	"schemaVersion": 1,
+	"id": "monarchs",
+	"version": "${version}",
+	"name": "Monarchs",
+	"description": "Immersive factions mod",
+	"authors": [
+		"Me!"
+	],
+	"contact": {
+		"homepage": "https://joshie.app",
+		"discord": "https://discord.gg/HUMbRQhxdR"
+	},
+	"license": "ARR",
+	"icon": "assets/monarchs/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"joshie.monarchs.Monarchs"
+		],
+		"client": [
+			"joshie.monarchs.MonarchsClient"
+		]
+	},
+	"mixins": [
+      "monarchs.mixins.json",
+		{
+			"config": "monarchs-melodies.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.15.11",
+		"minecraft": "~1.21",
+		"java": ">=21",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}
