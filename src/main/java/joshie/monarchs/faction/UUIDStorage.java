@@ -5,8 +5,8 @@ import com.google.gson.Gson;
 import joshie.monarchs.Monarchs;
 import joshie.monarchs.attachment.MonarchsAttachmentTypes;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.WorldSavePath;
+import net.minecraft.server.level.ServerPlayer;
+
 
 import java.io.File;
 import java.io.FileReader;
@@ -54,7 +54,7 @@ public class UUIDStorage {
         return uuidList;
     }
 
-    public static void checkFaction(ServerPlayerEntity entity) {
+    public static void checkFaction(ServerPlayer entity) {
         if (Monarchs.factionStorage.getUUIDs().contains(entity.getAttached(MonarchsAttachmentTypes.PERSISTENT_FACTION))) {
             entity.setAttached(MonarchsAttachmentTypes.PERSISTENT_FACTION, null);
         }

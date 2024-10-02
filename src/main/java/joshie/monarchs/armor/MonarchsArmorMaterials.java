@@ -1,22 +1,22 @@
 package joshie.monarchs.armor;
 
 import joshie.monarchs.Monarchs;
-import net.minecraft.item.ArmorItem;
-import net.minecraft.item.ArmorMaterial;
-import net.minecraft.recipe.Ingredient;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.ArmorMaterial;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.item.crafting.Ingredient;
 
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
 public class MonarchsArmorMaterials {
-    public static final RegistryEntry<ArmorMaterial> ROSE_GOLD = registerMaterial("rose_gold",
+    public static final Holder<ArmorMaterial> ROSE_GOLD = registerMaterial("rose_gold",
             Map.of(
                     ArmorItem.Type.HELMET, 0,
                     ArmorItem.Type.CHESTPLATE, 0,
@@ -24,7 +24,7 @@ public class MonarchsArmorMaterials {
                     ArmorItem.Type.BOOTS, 0
             ),
             0,
-            SoundEvents.ITEM_ARMOR_EQUIP_GOLD,
+            SoundEvents.ARMOR_EQUIP_GOLD,
             null,
             0.0F,
             0.0F,
@@ -33,19 +33,19 @@ public class MonarchsArmorMaterials {
 
     public static void initialize() {};
 
-    public static RegistryEntry<ArmorMaterial> registerMaterial(String id, Map<ArmorItem.Type, Integer> defensePoints, int enchantability, RegistryEntry<SoundEvent> equipSound, Supplier<Ingredient> repairIngredientSupplier, float toughness, float knockbackResistance, boolean dyeable) {
+    public static Holder<ArmorMaterial> registerMaterial(String id, Map<ArmorItem.Type, Integer> defensePoints, int enchantability, Holder<SoundEvent> equipSound, Supplier<Ingredient> repairIngredientSupplier, float toughness, float knockbackResistance, boolean dyeable) {
         // Get the supported layers for the armor material
         List<ArmorMaterial.Layer> layers = List.of(
 
-                new ArmorMaterial.Layer(Identifier.of(Monarchs.MOD_ID, id), "", dyeable)
+                new ArmorMaterial.Layer(ResourceLocation.fromNamespaceAndPath(Monarchs.MOD_ID, id), "", dyeable)
         );
 
         ArmorMaterial material = new ArmorMaterial(defensePoints, enchantability, equipSound, repairIngredientSupplier, layers, toughness, knockbackResistance);
         // Register the material within the ArmorMaterials registry.
-        material = Registry.register(Registries.ARMOR_MATERIAL, Identifier.of(Monarchs.MOD_ID, id), material);
+        material = Registry.register(BuiltInRegistries.ARMOR_MATERIAL, ResourceLocation.fromNamespaceAndPath(Monarchs.MOD_ID, id), material);
 
         // The majority of the time, you'll want the RegistryEntry of the material - especially for the ArmorItem constructor.
-        return RegistryEntry.of(material);
+        return Holder.direct(material);
     }
 
 }

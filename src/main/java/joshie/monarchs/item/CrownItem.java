@@ -9,24 +9,25 @@ import joshie.monarchs.Monarchs;
 import joshie.monarchs.access.PlayerEntityAccess;
 import joshie.monarchs.network.RulerGuiPacket;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.*;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 import static joshie.monarchs.Monarchs.*;
 
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.TypedActionResult;
-import net.minecraft.world.World;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.Style;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.ArmorMaterial;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
 import java.util.*;
 
@@ -37,36 +38,36 @@ import static joshie.monarchs.nbt.RulerTypeClass.RULER_TYPE;
 
 public class CrownItem extends ArmorItem {
 
-    public CrownItem(RegistryEntry<ArmorMaterial> material, Type type, Settings settings) {
+    public CrownItem(Holder<ArmorMaterial> material, Type type, Properties settings) {
         super(material, type, settings);
     }
 
 
 
     @Override
-    public boolean canRepair(ItemStack stack, ItemStack ingredient) {
+    public boolean isValidRepairItem(ItemStack stack, ItemStack ingredient) {
         return false;
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+    public void inventoryTick(ItemStack stack, Level world, Entity entity, int slot, boolean selected) {
         if (stack.get(FACTION) == null && ((PlayerEntityAccess)entity).monarchs$getFaction() != null) {
-            stack.decrement(1);
+            stack.shrink(1);
         }
-        if (slot == 3 && entity instanceof PlayerEntity player1 && player1.getInventory().getArmorStack(3) == stack) {
+        if (slot == 3 && entity instanceof Player player1 && player1.getInventory().getArmor(3) == stack) {
             if (stack.get(OWNER) == null) {
                     stack.set(OWNER, entity.getName().toString());
-                    stack.addEnchantment(entity.getWorld().getRegistryManager().get(RegistryKeys.ENCHANTMENT).getEntry(Identifier.ofVanilla("binding_curse")).get(), 1);
+                    stack.enchant(entity.level().registryAccess().registryOrThrow(Registries.ENCHANTMENT).getHolder(ResourceLocation.withDefaultNamespace("binding_curse")).get(), 1);
             } else {
                 if (Objects.equals(stack.get(FACTION), ((PlayerEntityAccess) entity).monarchs$getFaction())) {
                     ((PlayerEntityAccess) entity).monarchs$setFaction(null);
                     stack.set(OWNER, entity.getName().toString());
-                    stack.addEnchantment(entity.getWorld().getRegistryManager().get(RegistryKeys.ENCHANTMENT).getEntry(Identifier.ofVanilla("binding_curse")).get(), 1);
+                    stack.enchant(entity.level().registryAccess().registryOrThrow(Registries.ENCHANTMENT).getHolder(ResourceLocation.withDefaultNamespace("binding_curse")).get(), 1);
                     // Heir to the throne advancement
-                    if (entity instanceof ServerPlayerEntity) {
-                        grantAdvancement((ServerPlayerEntity) entity, Identifier.of("monarchs", "a_worthy_successor"));
+                    if (entity instanceof ServerPlayer) {
+                        grantAdvancement((ServerPlayer) entity, ResourceLocation.fromNamespaceAndPath("monarchs", "a_worthy_successor"));
                     }
-                    ((PlayerEntity)entity).sendMessage(Text.literal("Inherited a Monarchy").setStyle(Style.EMPTY.withColor(Formatting.GOLD)), true);
+                    ((Player)entity).displayClientMessage(Component.literal("Inherited a Monarchy").setStyle(Style.EMPTY.withColor(ChatFormatting.GOLD)), true);
                 }
             }
             UUID faction = stack.get(FACTION);
@@ -74,28 +75,28 @@ public class CrownItem extends ArmorItem {
                 UUID new_faction = UUID.randomUUID();
                 stack.set(FACTION, new_faction);
                 stack.set(OWNER, entity.getName().toString());
-                if (entity instanceof ServerPlayerEntity) {
-                    ServerPlayNetworking.send((ServerPlayerEntity)entity, new RulerGuiPacket("helmet"));
-                    grantAdvancement((ServerPlayerEntity) entity, Identifier.of("monarchs", "monarchy"));
+                if (entity instanceof ServerPlayer) {
+                    ServerPlayNetworking.send((ServerPlayer)entity, new RulerGuiPacket("helmet"));
+                    grantAdvancement((ServerPlayer) entity, ResourceLocation.fromNamespaceAndPath("monarchs", "monarchy"));
                 }
-                ((PlayerEntity)entity).sendMessage(Text.literal("Founded a Monarchy").setStyle(Style.EMPTY.withColor(Formatting.BLUE)), true);
+                ((Player)entity).displayClientMessage(Component.literal("Founded a Monarchy").setStyle(Style.EMPTY.withColor(ChatFormatting.BLUE)), true);
             } else {
-                for (PlayerEntity player : world.getPlayers()) {
-                    if (player.getUuid() != entity.getUuid()) {
+                for (Player player : world.players()) {
+                    if (player.getUUID() != entity.getUUID()) {
                         if (Objects.equals(((PlayerEntityAccess) player).monarchs$getFaction(), faction)) {
                             if (player.distanceTo(entity) <= 64) {
                                 switch (stack.get(RULER_TYPE)) {
                                     case "iron":
-                                        player.addStatusEffect(new StatusEffectInstance(Monarchs.IRON_EFFECT, 61, 0));
+                                        player.addEffect(new MobEffectInstance(Monarchs.IRON_EFFECT, 61, 0));
                                         break;
                                     case "flame":
-                                        player.addStatusEffect(new StatusEffectInstance(Monarchs.FLAME_EFFECT, 61, 0));
+                                        player.addEffect(new MobEffectInstance(Monarchs.FLAME_EFFECT, 61, 0));
                                         break;
                                     case "fury":
-                                        player.addStatusEffect(new StatusEffectInstance(Monarchs.FURY_EFFECT, 61, 0));
+                                        player.addEffect(new MobEffectInstance(Monarchs.FURY_EFFECT, 61, 0));
                                         break;
                                     case null, default:
-                                        player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 60, 0));
+                                        player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 60, 0));
                                 }
 
                             }
@@ -105,30 +106,30 @@ public class CrownItem extends ArmorItem {
             }
         } else if (!Objects.equals(stack.get(OWNER), entity.getName().toString()) && !Objects.equals(stack.get(FACTION), ((PlayerEntityAccess)entity).monarchs$getFaction())) {
             // Overthrown advancement
-            if (entity instanceof ServerPlayerEntity) {
-                grantAdvancement((ServerPlayerEntity) entity, Identifier.of("monarchs", "overthrown"));
+            if (entity instanceof ServerPlayer) {
+                grantAdvancement((ServerPlayer) entity, ResourceLocation.fromNamespaceAndPath("monarchs", "overthrown"));
             }
             // Overthrow logic
-            ((PlayerEntity)entity).sendMessage(Text.literal("Overthrown a Monarchy").setStyle(Style.EMPTY.withColor(Formatting.RED)), true);
+            ((Player)entity).displayClientMessage(Component.literal("Overthrown a Monarchy").setStyle(Style.EMPTY.withColor(ChatFormatting.RED)), true);
             factionStorage.addUUID(stack.get(FACTION));
-            stack.decrement(1);
+            stack.shrink(1);
         }
     }
     @Override
-    public int getProtection() {
+    public int getDefense() {
         return 0;
     }
 
 
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        if (user instanceof  ServerPlayerEntity) {
-            ServerPlayNetworking.send((ServerPlayerEntity) user, new RulerGuiPacket("Open the gui please!"));
-            return TypedActionResult.success(user.getStackInHand(hand), false);
+    public InteractionResultHolder<ItemStack> use(Level world, Player user, InteractionHand hand) {
+        if (user instanceof  ServerPlayer) {
+            ServerPlayNetworking.send((ServerPlayer) user, new RulerGuiPacket("Open the gui please!"));
+            return InteractionResultHolder.success(user.getItemInHand(hand));
         }
         else {
-            return TypedActionResult.fail(user.getStackInHand(hand));
+            return InteractionResultHolder.fail(user.getItemInHand(hand));
         }
     }
 }

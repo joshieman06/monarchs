@@ -20,6 +20,14 @@ repositories {
 		name = "CottonMC"
 		url = "https://server.bbkr.space/artifactory/libs-release"
 	}
+	maven {
+		name = 'ParchmentMC'
+		url = 'https://maven.parchmentmc.org'
+	}
+	maven {
+		name = 'Quilt'
+		url = "https://maven.quiltmc.org/repository/release/"
+	}
 }
 
 loom {
@@ -37,7 +45,11 @@ loom {
 dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+	mappings loom.layered() {
+		mappings("org.quiltmc:quilt-mappings:${project.minecraft_version}+build.${project.quilt_mappings_version}:intermediary-v2")
+		officialMojangMappings()
+		parchment("org.parchmentmc.data:parchment-${project.parchment_version}@zip")
+	}
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
