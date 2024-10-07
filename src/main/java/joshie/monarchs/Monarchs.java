@@ -14,35 +14,29 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityCombatEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
-import net.minecraft.advancement.Advancement;
-import net.minecraft.advancement.AdvancementEntry;
-import net.minecraft.advancement.AdvancementManager;
-import net.minecraft.advancement.AdvancementProgress;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.advancements.AdvancementProgress;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
 
-import static joshie.monarchs.attachment.MonarchsAttachmentTypes.RULER;
 import static joshie.monarchs.item.ModItems.registerModItems;
 import static joshie.monarchs.nbt.FactionClass.FACTION;
 import static joshie.monarchs.nbt.InvitedClass.INVITED;
 import static joshie.monarchs.nbt.OwnerClass.OWNER;
 import static joshie.monarchs.nbt.RulerTypeClass.RULER_TYPE;
 import static joshie.monarchs.statuseffects.MonarchEffects.*;
+import net.minecraft.core.Registry;
 
 public class Monarchs implements ModInitializer {
 	// This logger is used to write text to the console and the log file.
@@ -50,9 +44,9 @@ public class Monarchs implements ModInitializer {
 	// That way, it's clear which mod wrote info, warnings, and errors.
     public static final Logger LOGGER = LoggerFactory.getLogger("monarchs");
 	public static final String MOD_ID = "monarchs";
-    public static RegistryEntry<StatusEffect> IRON_EFFECT;
-	public static RegistryEntry<StatusEffect> FLAME_EFFECT;
-	public static RegistryEntry<StatusEffect> FURY_EFFECT;
+    public static Holder<MobEffect> IRON_EFFECT;
+	public static Holder<MobEffect> FLAME_EFFECT;
+	public static Holder<MobEffect> FURY_EFFECT;
 	public static UUIDStorage factionStorage = new UUIDStorage();
 
     @Override
@@ -61,14 +55,14 @@ public class Monarchs implements ModInitializer {
 		PayloadTypeRegistry.playS2C().register(RulerGuiPacket.PACKET_ID, RulerGuiPacket.PACKET_CODEC);
 		PayloadTypeRegistry.playC2S().register(RulerPacket.PACKET_ID, RulerPacket.PACKET_CODEC);
 		RulerPacket.registerServerReceiver();
-		IRON_EFFECT = Registry.registerReference(Registries.STATUS_EFFECT, Identifier.of("monarchs", "iron_will"), IRON);
-		FLAME_EFFECT = Registry.registerReference(Registries.STATUS_EFFECT, Identifier.of("monarchs", "blazing_heart"), FLAME);
-		FURY_EFFECT = Registry.registerReference(Registries.STATUS_EFFECT, Identifier.of("monarchs", "rage"), FURY);
+		IRON_EFFECT = Registry.registerForHolder(BuiltInRegistries.MOB_EFFECT, ResourceLocation.fromNamespaceAndPath("monarchs", "iron_will"), IRON);
+		FLAME_EFFECT = Registry.registerForHolder(BuiltInRegistries.MOB_EFFECT, ResourceLocation.fromNamespaceAndPath("monarchs", "blazing_heart"), FLAME);
+		FURY_EFFECT = Registry.registerForHolder(BuiltInRegistries.MOB_EFFECT, ResourceLocation.fromNamespaceAndPath("monarchs", "rage"), FURY);
 
-		Registry.register(Registries.DATA_COMPONENT_TYPE, Identifier.of("monarchs", "faction"), FACTION);
-		Registry.register(Registries.DATA_COMPONENT_TYPE, Identifier.of("monarchs", "invited"), INVITED);
-		Registry.register(Registries.DATA_COMPONENT_TYPE, Identifier.of("monarchs", "ruler_type"), RULER_TYPE);
-		Registry.register(Registries.DATA_COMPONENT_TYPE, Identifier.of("monarchs", "owner"), OWNER);
+		Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, ResourceLocation.fromNamespaceAndPath("monarchs", "faction"), FACTION);
+		Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, ResourceLocation.fromNamespaceAndPath("monarchs", "invited"), INVITED);
+		Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, ResourceLocation.fromNamespaceAndPath("monarchs", "ruler_type"), RULER_TYPE);
+		Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, ResourceLocation.fromNamespaceAndPath("monarchs", "owner"), OWNER);
 		// This code runs as soon as Minecraft is in a mod-load-ready state.
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
@@ -83,77 +77,75 @@ public class Monarchs implements ModInitializer {
 		});
 	}
 
-	private void onPlayerKill(ServerWorld serverWorld, Entity entity, LivingEntity livingEntity) {
+	private void onPlayerKill(ServerLevel serverWorld, Entity entity, LivingEntity livingEntity) {
 		// Check if the attacker is a player
-		if (entity instanceof ServerPlayerEntity attacker && livingEntity instanceof PlayerEntity victim) {
+		if (entity instanceof ServerPlayer attacker && livingEntity instanceof Player victim) {
 			if (((PlayerEntityAccess)attacker).monarchs$getFaction() != null) {
 				if (((PlayerEntityAccess)victim).monarchs$getFaction() != null) {
-					grantAdvancement(attacker, Identifier.of("monarchs", "valor"));
+					grantAdvancement(attacker, ResourceLocation.fromNamespaceAndPath("monarchs", "valor"));
 				}
-				if (victim.getAttached(RULER) != null) {
-					grantAdvancement(attacker, Identifier.of("monarchs", "honor"));
+				if (true) { // Get attached ruler != null
+					grantAdvancement(attacker, ResourceLocation.fromNamespaceAndPath("monarchs", "honor"));
 				}
 			}
-			if (attacker.getInventory().getArmorStack(3).getItem() instanceof CrownItem) {
+			if (attacker.getInventory().getArmor(3).getItem() instanceof CrownItem) {
 
-				switch(attacker.getInventory().getArmorStack(3).get(RULER_TYPE)) {
+				switch(attacker.getInventory().getArmor(3).get(RULER_TYPE)) {
 					case "iron":
-						grantAdvancement(attacker, Identifier.of("monarchs", "iron_monarch_kill"));
-						switch(victim.getAttached(RULER)) {
+						grantAdvancement(attacker, ResourceLocation.fromNamespaceAndPath("monarchs", "iron_monarch_kill"));
+						switch() { //victim.getAttached(Ruler)
 							case "iron":
-								grantAdvancement(attacker, Identifier.of("monarchs", "iron_kill_iron"));
+								grantAdvancement(attacker, ResourceLocation.fromNamespaceAndPath("monarchs", "iron_kill_iron"));
 								break;
 							case "flame":
-								grantAdvancement(attacker, Identifier.of("monarchs", "iron_kill_flame"));
+								grantAdvancement(attacker, ResourceLocation.fromNamespaceAndPath("monarchs", "iron_kill_flame"));
 								break;
 							case "fury":
-								grantAdvancement(attacker, Identifier.of("monarchs", "iron_kill_fury"));
+								grantAdvancement(attacker, ResourceLocation.fromNamespaceAndPath("monarchs", "iron_kill_fury"));
 								break;
 						}
 						break;
 					case "flame":
-						grantAdvancement(attacker, Identifier.of("monarchs", "flame_monarch_kill"));
-						switch(victim.getAttached(RULER)) {
+						grantAdvancement(attacker, ResourceLocation.fromNamespaceAndPath("monarchs", "flame_monarch_kill"));
+						switch() { //victim.getAttached(Ruler)
 							case "iron":
-								grantAdvancement(attacker, Identifier.of("monarchs", "flame_kill_iron"));
+								grantAdvancement(attacker, ResourceLocation.fromNamespaceAndPath("monarchs", "flame_kill_iron"));
 								break;
 							case "flame":
-								grantAdvancement(attacker, Identifier.of("monarchs", "flame_kill_flame"));
+								grantAdvancement(attacker, ResourceLocation.fromNamespaceAndPath("monarchs", "flame_kill_flame"));
 								break;
 							case "fury":
-								grantAdvancement(attacker, Identifier.of("monarchs", "flame_kill_fury"));
+								grantAdvancement(attacker, ResourceLocation.fromNamespaceAndPath("monarchs", "flame_kill_fury"));
 								break;
 						}
 						break;
 					case "fury":
-						grantAdvancement(attacker, Identifier.of("monarchs", "fury_monarch_kill"));
-						switch(victim.getAttached(RULER)) {
+						grantAdvancement(attacker, ResourceLocation.fromNamespaceAndPath("monarchs", "fury_monarch_kill"));
+						switch() { //victim.getAttached(Ruler)
 							case "iron":
-								grantAdvancement(attacker, Identifier.of("monarchs", "fury_kill_iron"));
+								grantAdvancement(attacker, ResourceLocation.fromNamespaceAndPath("monarchs", "fury_kill_iron"));
 								break;
 							case "flame":
-								grantAdvancement(attacker, Identifier.of("monarchs", "fury_kill_flame"));
+								grantAdvancement(attacker, ResourceLocation.fromNamespaceAndPath("monarchs", "fury_kill_flame"));
 								break;
 							case "fury":
-								grantAdvancement(attacker, Identifier.of("monarchs", "fury_kill_fury"));
+								grantAdvancement(attacker, ResourceLocation.fromNamespaceAndPath("monarchs", "fury_kill_fury"));
 								break;
 						}
 						break;
 				}
-				victim.setAttached(RULER, null);
+				// Attach ruler = null
 			}
 		}
 	}
 
-	public static void grantAdvancement(ServerPlayerEntity player, Identifier advancementId) {
-		AdvancementEntry advancement = player.server.getAdvancementLoader().get(advancementId);
-		AdvancementProgress advancementProgress = player.getAdvancementTracker().getProgress(advancement);
+	public static void grantAdvancement(ServerPlayer player, ResourceLocation advancementId) {
+		AdvancementHolder advancement = player.server.getAdvancements().get(advancementId);
+		AdvancementProgress advancementProgress = player.getAdvancements().getOrStartProgress(advancement);
 		if (!advancementProgress.isDone()) {
-			Iterator var4 = advancementProgress.getUnobtainedCriteria().iterator();
-			while (var4.hasNext()) {
-				String string = (String) var4.next();
-				player.getAdvancementTracker().grantCriterion(advancement, string);
-			}
+            for (String string : advancementProgress.getRemainingCriteria()) {
+                player.getAdvancements().award(advancement, string);
+            }
 		}
 	}
 }

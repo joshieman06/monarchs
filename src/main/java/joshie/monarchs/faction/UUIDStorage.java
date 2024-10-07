@@ -2,10 +2,10 @@ package joshie.monarchs.faction;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import joshie.monarchs.Monarchs;
-import joshie.monarchs.attachment.MonarchsAttachmentTypes;
+
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.storage.LevelResource;
 
 
 import java.io.File;
@@ -24,7 +24,7 @@ public class UUIDStorage {
 
 
     public void saveUUIDs(MinecraftServer server) {
-        File file = new File(server.getSavePath(WorldSavePath.ROOT).toFile(), FILE_NAME);
+        File file = new File(server.getWorldPath(LevelResource.ROOT).toFile(), FILE_NAME);
         try (FileWriter writer = new FileWriter(file)) {
             GSON.toJson(uuidList, writer);
         } catch (IOException e) {
@@ -39,7 +39,7 @@ public class UUIDStorage {
     }
 
     public void loadUUIDs(MinecraftServer server) {
-        File file = new File(server.getSavePath(WorldSavePath.ROOT).toFile(), FILE_NAME);
+        File file = new File(server.getWorldPath(LevelResource.ROOT).toFile(), FILE_NAME);
         if (file.exists()) {
             try (FileReader reader = new FileReader(file)) {
                 Type listType = new TypeToken<List<UUID>>() {}.getType();
@@ -55,9 +55,7 @@ public class UUIDStorage {
     }
 
     public static void checkFaction(ServerPlayer entity) {
-        if (Monarchs.factionStorage.getUUIDs().contains(entity.getAttached(MonarchsAttachmentTypes.PERSISTENT_FACTION))) {
-            entity.setAttached(MonarchsAttachmentTypes.PERSISTENT_FACTION, null);
-        }
+
     }
 
 

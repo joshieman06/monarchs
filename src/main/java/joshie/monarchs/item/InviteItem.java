@@ -6,18 +6,19 @@
 package joshie.monarchs.item;
 
 import joshie.monarchs.access.PlayerEntityAccess;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.*;
 
 
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.TypedActionResult;
-import net.minecraft.world.World;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
 import java.util.*;
 
@@ -27,27 +28,27 @@ import static joshie.monarchs.nbt.InvitedClass.INVITED;
 
 
 public class InviteItem extends Item {
-    public InviteItem(Settings settings) {
+    public InviteItem(Properties settings) {
         super(settings);
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        ItemStack itemStack = user.getStackInHand(hand);
-        if (user.getInventory().getArmorStack(3).getItem() instanceof CrownItem) {
-            return TypedActionResult.fail(itemStack);
+    public InteractionResultHolder<ItemStack> use(Level world, Player user, InteractionHand hand) {
+        ItemStack itemStack = user.getItemInHand(hand);
+        if (user.getInventory().getArmor(3).getItem() instanceof CrownItem) {
+            return InteractionResultHolder.fail(itemStack);
         }
         UUID faction = itemStack.get(FACTION);
         if (faction != null && Objects.equals(itemStack.get(INVITED), user.getName().toString())) {
             ((PlayerEntityAccess) user).monarchs$setFaction(faction);
-            itemStack.decrement(1);
-            (user).sendMessage(Text.literal("Joined a Monarchy").setStyle(Style.EMPTY.withColor(Formatting.BLUE)), true);
-            if (user instanceof ServerPlayerEntity) {
-                grantAdvancement((ServerPlayerEntity) user, Identifier.of("monarchs", "knighthood"));
+            itemStack.shrink(1);
+            (user).displayClientMessage(Component.literal("Joined a Monarchy").setStyle(Style.EMPTY.withColor(ChatFormatting.BLUE)), true);
+            if (user instanceof ServerPlayer) {
+                grantAdvancement((ServerPlayer) user, ResourceLocation.fromNamespaceAndPath("monarchs", "knighthood"));
             }
-            return TypedActionResult.consume(itemStack);
+            return InteractionResultHolder.consume(itemStack);
         }
-        return TypedActionResult.pass(itemStack);
+        return InteractionResultHolder.pass(itemStack);
     }
 
 }
